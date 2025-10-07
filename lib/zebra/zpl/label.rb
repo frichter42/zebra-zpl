@@ -6,7 +6,7 @@ module Zebra
       class InvalidPrintSpeedError     < StandardError; end
       class PrintSpeedNotInformedError < StandardError; end
 
-      attr_writer :copies, :label_shift
+      attr_writer :copies, :label_shift, :label_offset
       attr_reader :elements, :tempfile
       attr_accessor :width, :length, :print_speed
 
@@ -28,6 +28,10 @@ module Zebra
         @label_shift || 10
       end
 
+      def label_offset
+        @label_offset || 0
+      end
+
       def <<(element)
         element.width = self.width if element.respond_to?("width=") && element.width.nil?
         elements << element
@@ -44,6 +48,8 @@ module Zebra
         io << "^LH0,0"
         # ^LS<shift the label to the left(or right)>
         io << "^LS#{label_shift}"
+        # ^LS<shift the label to the top(or bottom)>
+        io << "^LT#{label_offset}"
         # ^PW<label width in dots>
         io << "^PW#{width}" if width
         # Print Rate(speed) (^PR command)
